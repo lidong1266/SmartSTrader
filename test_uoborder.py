@@ -13,10 +13,12 @@
 
 
 from order.uob import  *
-
+from session.session import Session
 
 
 if __name__ == '__main__':
 	print "s"
 	print UOB_USERNAME
 	print UOB_PASSWORD
+	session = Session()
+	session.Login("UOB")
