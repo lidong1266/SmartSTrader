@@ -12,7 +12,7 @@
 #  Requires: Python 2.7/3.2+
 
 
-from Order.uob import  *
+from order.uob import  *
 
 
 
