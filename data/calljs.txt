@@ -1,0 +1,29 @@
+Call : function(a_srvname, a_callback, a_arguments, a_cid){
+
+a_srvname = "US_CategoryService.getList"
+
+a_arguments
+	Object { page=5, num=20, asc=0, more...}
+	
+asc
+	0
+	
+id
+	""
+	
+market
+	"N"
+	
+num
+	20
+	
+page
+	5
+	
+sort
+	""
+	
+a_cid
+	true
+	
+"http://stock.finance.sina.com.cn/usstock/api/jsonp.php/IO.XSRV2.CallbackList['gUWtb0zRlttjKnqK']/US_CategoryService.getList?page=5&num=20&sort=&asc=0&market=N&id="	
