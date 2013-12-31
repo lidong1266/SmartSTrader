@@ -26,6 +26,7 @@ class Session:
 		zero arguments.  Default is Message.Message.
 		"""
 		self._sessiontype = ''
+		self._sessionValid = False
 		if len(args) >= 1:
 			if '_class' in kws:
 				raise TypeError("Multiple values for keyword arg '_class'")
@@ -66,9 +67,14 @@ class UOBSession(Session):
 			print "Login failed. Please check"
 		else:
 			self._cookie = "; ".join(self._cookies)
-			today_orders = GetTodaysOrder(self._cookie)
-			print today_orders
-		pass
+			self._sessionValid = True
+			
+	def GetTodaysOrder():
+		if not self._sessionValid:
+			return None
+		today_orders = GetTodaysOrder(self._cookie)
+		print today_orders
+		
 	def GetCookie(self):
 		if hasattr(self, "_cookie"):
 			return self._cookie

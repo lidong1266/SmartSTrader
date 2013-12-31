@@ -24,3 +24,4 @@ if __name__ == '__main__':
 	print session.GetCookie()
 	session.Login("UOB")
 	print session.GetCookie()
+	print session.GetTodaysOrder()

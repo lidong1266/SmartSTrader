@@ -617,6 +617,7 @@ def ParseTodaysOrder(html):
 		uob_order.crUrl = tds[15].a["href"]
 		
 		print "xx"
+		print uob_order
 		uob_orders.append(uob_order)
 	
 	#Other Orders
