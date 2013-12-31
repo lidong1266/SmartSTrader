@@ -4,10 +4,19 @@ import urllib2
 import re
 import sys
 import ConfigParser
-
+import logging
 
 from urllib2 import Request, build_opener, HTTPCookieProcessor, HTTPHandler
 import httplib, urllib, cookielib, Cookie, os
+
+
+if sys.hexversion >= 0x02060000:
+	from bs4 import BeautifulSoup
+else:
+	from BeautifulSoup import BeautifulSoup
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 cj=[]
 
@@ -24,32 +33,27 @@ UOB_PASSWORD = config.get('UOB_ONLINE', 'password')
 
 order_pattern = re.compile("This order has been accepted under number:<b>(UB[0-9]+)</b>,<br>")
 stock_symbol_pattern = re.compile("Market=[a-zA-Z]&Symbol=([A-Z]+)")
+
 #SETP1
 #fist connection attempt.
 def ConnectToUOBWIthLogin():
 	http_action = "GET"
 	http_url    = '/hello/login.asp?reason=denied_empty&script_name=/'
-	print "ACTION:%s\nURL:%s\n" % (http_action, http_url)
+	logger.debug("ACTION:%s\nURL:%s\n" % (http_action, http_url))
 	conn=httplib.HTTPSConnection('us.uobkayhian.com', 443)
 	conn.request(http_action, http_url)
 	content = conn.getresponse()  
-	#print content.getheaders()     
 	#print content.status, content.reason
-
-
-	if content.getheader('Set-Cookie')!=None:
+	if content.getheader('Set-Cookie') !=None:
 		cj.append(content.getheader('Set-Cookie').split(';')[0])
-	hdrs = content.getheader('set-cookie')
-	#print "STEP-1:%s" % hdrs
-	#print cj
-
+		logger.debug("Set-Cookie:%s", content.getheader('Set-Cookie'))
 	conn.close()
 
 #SETP2 -- login
 def SendLoginCredentialToUOB():
 	http_action = "POST"
 	http_url    = '/hello/login.asp'
-	print "ACTION:%s\nURL:%s\n" % (http_action, http_url)
+	#print "ACTION:%s\nURL:%s\n" % (http_action, http_url)
 	
 	values = {'PlatBrow' : '',
 			  'Script_Name' : '/',
@@ -59,15 +63,16 @@ def SendLoginCredentialToUOB():
 	'submit1.y': '14'		  }
 
 	data = urllib.urlencode(values)
-	print data
+	#print data
 
 	ck=''
 	for item in cj:
 		ck= ck+item + "; "
 	ck=ck[0:-2]
-	print "CK:%s" % ck
 	
-	data="PlatBrow=&Script_Name=%2F&USERNAME=%s&PASSWORD=%s&submit1.x=23&submit1.y=14" % (UOB_USERNAME, UOB_PASSWORD) 
+	logger.debug("Cookie:%s", ck)
+	
+	data="PlatBrow=&Script_Name=%%2F&USERNAME=%s&PASSWORD=%s&submit1.x=23&submit1.y=14" % (UOB_USERNAME, UOB_PASSWORD) 
 	conn=httplib.HTTPSConnection('us.uobkayhian.com', 443)
 	user_agent = 'Mozilla/5.0 (Windows NT 5.1; rv:12.0) Gecko/20100101 Firefox/12.0'
 	headers = { 'User-Agent' : user_agent,
@@ -80,24 +85,32 @@ def SendLoginCredentialToUOB():
 	'Cookie':ck,
 	"Content-type": "application/x-www-form-urlencoded"}
 
-	print headers
+	#print headers
 	conn.request("POST", "/hello/login.asp", data, headers)
 	content = conn.getresponse()
-	print content.getheaders()
-	print content.read()
-	print content.reason, content.status
+	#print content.getheaders()
+	#print content.read()
+	#print content.reason, content.status
 	hdrs = content.getheader('set-cookie')
 
 	status = content.status
-	#if status == 302:
-
+	if status == 302:
+		location = content.getheader('location')
+		if location == "/hello/failed.asp":
+			raise Exception('Caution: Login failed, please check your login credential!')
+		elif location == "/default.asp?PlatBrow=":
+			logger.info('Login to UOB Kay Hian Successfully')
+		else:	
+			raise Exception('Caution: Unknown redirection url')
+	else:
+		raise Exception('Caution: Unexpected HTTP status code')
 	if content.getheader('Set-Cookie')!=None:
 		cj.append(content.getheader('Set-Cookie').split(';')[0])
-		print "xx"
-		print content.getheader('Set-Cookie')
-	hdrs = content.getheader('set-cookie')
-	print "STEP-2:%s" % hdrs
-	print cj
+		#print "xx"
+		#print content.getheader('Set-Cookie')
+	#hdrs = content.getheader('set-cookie')
+	#print "STEP-2:%s" % hdrs
+	#print cj
 		
 	conn.close()
 
@@ -122,7 +135,7 @@ def BrowserToPlatBrow():
 	for item in cj:
 		ck= ck+item + "; "
 	ck=ck[0:-2]
-	print "CK:%s" % ck
+	#print "CK:%s" % ck
 	hdrs = { 'User-Agent' : user_agent,
 	'Host': 'us.uobkayhian.com', 
 	'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -131,16 +144,23 @@ def BrowserToPlatBrow():
 	#'Connection': 'keep-alive',
 	'Referer': 'https://us.uobkayhian.com/hello/login.asp?reason=denied_empty&script_name=/',
 	'Cookie':ck}
-	print hdrs
+	#print hdrs
 	conn.request("GET", "/default.asp?PlatBrow=", headers=hdrs)
 	content = conn.getresponse()
-	print content.getheaders()
+	#print content.getheaders()
 	#print content.read()
 	#print content.reason, content.status
 	hdrs = content.getheader('set-cookie')
 
 	status = content.status
-	#if status == 302:
+	if status == 302:
+		location = content.getheader('location')
+		if location == "/markets/top/top.asp?MenuID=trade":
+			logger.info('Browser to trade platform successfully')
+		else:	
+			raise Exception('Caution: Unknown redirection url')
+	else:
+		raise Exception('Caution: Unexpected HTTP status code')
 
 	if content.getheader('Set-Cookie')!=None:
 		cj.append(content.getheader('Set-Cookie').split(';')[0])
@@ -151,6 +171,7 @@ def BrowserToPlatBrow():
 	conn.close()
 	#print "##########\n\n"
 	#exit(0)
+	return cj
 	
 	
 """GET /markets/top/top.asp?MenuID=trade HTTP/1.1
@@ -498,6 +519,57 @@ def CancelOrderToUOB(order_no):
 	#print cj
 		
 	conn.close()
+
+def GetTodaysOrder(cookie):
+	conn=httplib.HTTPSConnection('us.uobkayhian.com', 443)
+	user_agent = 'Mozilla/5.0 (Windows NT 5.1; rv:12.0) Gecko/20100101 Firefox/12.0'
+	ck=''
+	order_no = None
+	
+	if not isinstance(cookie, str):
+		ck = "; ".join(cookie)
+	else:
+		ck = cookie
+
+	hdrs = { 'User-Agent' : user_agent,
+	'Host': 'us.uobkayhian.com', 
+	'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+	'Accept-Language': 'en-us,en;q=0.5',
+	'Accept-Encoding': 'gzip, deflate',
+	#'Connection': 'keep-alive',
+	'Referer': "https://us.uobkayhian.com/markets/top/top.asp?MenuID=trade",
+	'Cookie':ck}
+
+	url = "/myaccount/portfolio/getOrders.asp?MenuID=orderb&type=today"
+	conn.request("GET", url, headers=hdrs)
+	content = conn.getresponse()
+	#print content.getheaders()
+	#print content.reason, content.status
+	#hdrs = content.getheader('set-cookie')
+	#print hdrs
+	f_order = open("today_order.html", "w")
+	html_order = content.read()
+	f_order.write(html_order)
+	f_order.close()
+	soup = BeautifulSoup(html_order)
+	status = content.status
+	#if status == 302:
+
+	if content.getheader('Set-Cookie')!=None:
+		cj.append(content.getheader('Set-Cookie').split(';')[0])
+	hdrs = content.getheader('set-cookie')
+	#print "4:%s" % hdrs
+	#print cj
+	if status == 302:
+		http_location = content.getheader('Location')
+		print http_location
+		order_no_m =  order_pattern.search(http_location)
+		if order_no_m:
+			order_no = order_no_m.group(1)
+		#"placed_U.asp?market=U&transaction=B&quantity=1&symbol=YOKU&type=0&price=1&stop=&fill=0&valid=0&sOut=This order has been accepted under number:<b>UB1682331</b>,<br>and will be sent to the NYSE exchange.<br><br>Please note that number for future reference.&lastPrice=30.5&dBid=0&dAsk=0&dcommission=0&currency=USD"
+		
+	conn.close()
+	return order_no
 	
 if __name__ == "__main__":
 	print "HELLO UOB"

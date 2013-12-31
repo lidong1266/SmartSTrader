@@ -2,6 +2,11 @@
 __all__ = ['Session', 'UOBSession']
 
 import warnings
+import logging
+from order.uob import *
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class Session:
 	def __init__(self, *args, **kws):
@@ -45,11 +50,23 @@ class Session:
 		return False
 	def SessionType(self):
 		return self._sessiontype
+
+		
 class UOBSession(Session):
 	def Login(self, platform):
 		self._sessiontype = 'Cookie'
 		self._cookie = ''
-		print "Try login to platform:%s" % platform
+		self._cookies = None
+		logger.info("Try login to platform:%s" % platform)
+		try:
+			ConnectToUOBWIthLogin()
+			SendLoginCredentialToUOB()
+			self._cookies = BrowserToPlatBrow()
+		except Exception, e:
+			print "Login failed. Please check"
+		else:
+			self._cookie = "; ".join(self._cookies)
+			GetTodaysOrder(self._cookie)
 		pass
 	def GetCookie(self):
 		if hasattr(self, "_cookie"):
