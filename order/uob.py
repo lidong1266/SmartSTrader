@@ -520,12 +520,130 @@ def CancelOrderToUOB(order_no):
 		
 	conn.close()
 
+class UOBOrder():
+	def __init__(self):
+		self.orderId = ''
+		self.orderUrl = ''
+		self.orderType = 'B'
+		self.Qty = 0
+		self.Symbol = ''
+		self.Price = 0
+		self.time = None
+		self.lastQuote = 0
+		self.status = 'B'
+		self.Aon = ''
+		self.Gtc = 'Day'
+		self.SettCur = 'USD'
+		self.Value = 0
+		self.crUrl = ''
+	def __str__(self):
+		return "Order:%s" % self.orderId
+	
+def ParseTodaysOrder(html):	
+	
+	uob_orders = []
+	soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES)
+	
+	tables = soup.html.body.findAll(name='table', recursive=False)
+	
+
+	#Second table
+	tds = soup.html.body.table.findNextSibling("table").tr.findAll(name='td', recursive=False)
+	if len(tds) < 4:
+		return None
+	
+	
+	main_td = tds[2]
+	
+	main_tables = main_td.findAll(name='table', recursive=False)
+	if len(main_tables) <= 1:
+		return None
+	
+	if html.find("There are currently no orders to display") != -1:
+		return None
+	#Today's Orders 
+	tdo_table = main_tables[0]
+	tdo_tr_header = tdo_table.findNext("tr", attrs={"bgcolor":"white"})
+	
+	# Try to find text
+	if tdo_tr_header.td.text.find("Today's Orders") == -1:
+		return None
+
+	# All today's order has a row with class "mainNormal"
+	tdo_trs = tdo_tr_header.findNextSiblings("tr", attrs={"class":"mainNormal"})
+	for tdo_tr in tdo_trs:
+		tds = tdo_tr.findAll(name='td', recursive=False)
+		uob_order = UOBOrder()
+		print "Order Ref(href):", tds[1].a["href"]
+		uob_order.orderUrl = tds[1].a["href"]
+		
+		uob_order.orderId = tds[1].a.text
+		print "Order Ref:", tds[1].a.text
+		
+		print "B/S:", tds[2].text	#
+		uob_order.orderType = tds[2].text
+		
+		print "Qty:", tds[3].text
+		uob_order.Qty = int(tds[3].text)
+		
+		print "Symbol:", tds[4].text
+		uob_order.Symbol = tds[4].text
+		
+		print "Price:", tds[5].text
+		uob_order.Price = float(tds[5].text)
+		
+		print "C/E Time:", tds[6].text
+		uob_order.time = tds[6].text
+		
+		print "Last Quote:", tds[7].text
+		uob_order.lastQuote = float(tds[7].text)
+		
+		print "Status:",  tds[8].text
+		uob_order.status = tds[8].text
+		
+		print "AON:",  tds[9].text
+		uob_order.Aon = tds[9].text
+		
+		print "GTC:",  tds[10].text
+		uob_order.Gtc = tds[10].text
+		
+		print "Sett Curr.:",  tds[11].text
+		uob_order.SettCur = tds[11].text
+		
+		print "Value (USD):",  tds[12].text
+		uob_order.Value = float(tds[12].text)
+		
+		print "C/R:",  tds[15].a["href"]
+		uob_order.crUrl = tds[15].a["href"]
+		
+		print "xx"
+		uob_orders.append(uob_order)
+	
+	#Other Orders
+	other_od_table = main_tables[1]
+	#print other_od_table
+	other_od_tr_header = other_od_table.findNext("tr", attrs={"bgcolor":"white"})
+	#print other_od_tr_header.td.text
+	other_od_tr_title = other_od_tr_header.findNextSibling("tr", attrs={"class":"mainBold"})
+	other_od_trs = other_od_tr_title.findNextSiblings("tr")
+	#print other_od_trs
+	for other_od_tr in other_od_trs:
+		#print other_od_tr
+		tds = other_od_tr.findAll(name='td', recursive=False)
+		#print other_od_tr
+		print tds[0].text
+		print tds[1].text
+		print tds[2].text
+		print tds[3].text
+		print tds[4].text
+		print tds[5].text
+		print 	
+	return uob_orders
+	
 def GetTodaysOrder(cookie):
 	conn=httplib.HTTPSConnection('us.uobkayhian.com', 443)
 	user_agent = 'Mozilla/5.0 (Windows NT 5.1; rv:12.0) Gecko/20100101 Firefox/12.0'
-	ck=''
-	order_no = None
-	
+	ck=''	
 	if not isinstance(cookie, str):
 		ck = "; ".join(cookie)
 	else:
@@ -551,25 +669,12 @@ def GetTodaysOrder(cookie):
 	html_order = content.read()
 	f_order.write(html_order)
 	f_order.close()
-	soup = BeautifulSoup(html_order)
+	orders = ParseTodaysOrder(html_order)
 	status = content.status
-	#if status == 302:
-
-	if content.getheader('Set-Cookie')!=None:
-		cj.append(content.getheader('Set-Cookie').split(';')[0])
-	hdrs = content.getheader('set-cookie')
-	#print "4:%s" % hdrs
-	#print cj
-	if status == 302:
-		http_location = content.getheader('Location')
-		print http_location
-		order_no_m =  order_pattern.search(http_location)
-		if order_no_m:
-			order_no = order_no_m.group(1)
-		#"placed_U.asp?market=U&transaction=B&quantity=1&symbol=YOKU&type=0&price=1&stop=&fill=0&valid=0&sOut=This order has been accepted under number:<b>UB1682331</b>,<br>and will be sent to the NYSE exchange.<br><br>Please note that number for future reference.&lastPrice=30.5&dBid=0&dAsk=0&dcommission=0&currency=USD"
-		
+	
 	conn.close()
-	return order_no
+	return orders
+
 	
 if __name__ == "__main__":
 	print "HELLO UOB"

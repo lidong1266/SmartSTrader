@@ -66,7 +66,8 @@ class UOBSession(Session):
 			print "Login failed. Please check"
 		else:
 			self._cookie = "; ".join(self._cookies)
-			GetTodaysOrder(self._cookie)
+			today_orders = GetTodaysOrder(self._cookie)
+			print today_orders
 		pass
 	def GetCookie(self):
 		if hasattr(self, "_cookie"):
