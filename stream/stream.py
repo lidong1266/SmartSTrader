@@ -35,7 +35,7 @@ class EST(datetime.tzinfo):
         return datetime.timedelta(0)
 		
 class Stream(threading.Thread):
-	def __init__(self, Symbol, url, handler = None, interval = 5):
+	def __init__(self, Symbol, url, handler = None, interval = 30):
 		threading.Thread.__init__(self, name=Symbol)
 		self.Symbol = Symbol
 		self.Url = url
@@ -58,7 +58,7 @@ class Stream(threading.Thread):
 		
 		while True:
 			self.get_us_stock_price('gb_' + self.Symbol.lower())
-			sleep(30)
+			sleep(self.Interval)
 			now = datetime.datetime.now(EST())
 			print "%s says Hello World at time: %s" % (self.getName(), now)
 

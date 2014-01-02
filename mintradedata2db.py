@@ -26,7 +26,7 @@ def Main():
 	mysqlConfig = MySqlConfig(dbname='smartstrader')
 	mysql = MySql('smartstrader', 'smartstrader', True)
 	mysql.check(mysqlConfig)
-	stream = Stream('QUNR', '')
+	stream = Stream('QUNR', '', None, 15)
 	handler = MysqlStreamHandler(mysql)
 	stream.RegisterHandler(handler)
 	
