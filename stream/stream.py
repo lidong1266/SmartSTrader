@@ -15,6 +15,18 @@ import urllib2
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+"""http://www.saltycrane.com/blog/2008/01/how-to-use-args-and-kwargs-in-python/"""
+class StreamHandler:
+    def __init__(self, parent = None):
+        self.parent = parent
+    def Handle(self, event, *args):
+        handler = 'Handle_' +event
+        if hasattr(self, handler):
+            func = getattr(self, handler)
+            func(*args)
+        elif self.parent:
+            self.parent.Handle(event, *args)
+
 class EST(datetime.tzinfo):
     def utcoffset(self, dt):
       return datetime.timedelta(hours=-5)
@@ -23,12 +35,16 @@ class EST(datetime.tzinfo):
         return datetime.timedelta(0)
 		
 class Stream(threading.Thread):
-	def __init__(self, Symbol, url, interval = 5):
+	def __init__(self, Symbol, url, handler = None, interval = 5):
 		threading.Thread.__init__(self, name=Symbol)
 		self.Symbol = Symbol
 		self.Url = url
 		self.Interval = interval
+		self.handler = handler
 
+	def RegisterHandler(self, handler):
+		self.handler = handler
+		
 	def StartPoll(self):
 		self.run()
 		print "xx"
@@ -97,6 +113,8 @@ class Stream(threading.Thread):
 		print u"前收盘", data[26] 		##---
 		print u"盘后交易", data[27] 		##---'''
 		#exit(0)
+		if self.handler:
+			self.handler.Handle("Data", data)
 		return  
 		name = "%-6s" % data[0]
 		price_current = "%-6s" % float(data[3])

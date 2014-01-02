@@ -23,7 +23,7 @@ class MySqlConfig:
 			return default_value
 	
 class MySql:
-	def __init__(self, name, dbname = ''):
+	def __init__(self, name, dbname = '', autocommit = False):
 		self.mysql_version = {}
 		self.log = logging.getLogger(name)
 		self.log.setLevel(logging.WARNING)
@@ -31,6 +31,7 @@ class MySql:
 		self.db = None
 		self.configinstance = None
 		self.dbname = dbname
+		self.autocommit = autocommit
 	#def 
 	def get_library_versions(self):
 		try:
@@ -51,8 +52,13 @@ class MySql:
 		
 		self.configinstance = instance
 		self.db = self._connect(host, port, mysql_sock, user, password, dbname, defaults_file)
+		#SET UTF-8
+		self.db.set_character_set('utf8')
 		self.cursor = self.db.cursor()
 		self._cursorUtf8(self.cursor)
+		if self.autocommit:
+			self.cursor.connection.autocommit(True)
+		
 	
 	
 	def _get_config(self, instance):
@@ -95,17 +101,14 @@ class MySql:
 									passwd=password,
 									db = dbname)
 		self.log.debug("Connected to MySQL")
-		
-		#SET UTF-8
-		self.db.set_character_set('utf8')
-		
+
 		return db
 	"""http://stackoverflow.com/questions/1566602/is-set-character-set-utf8-necessary"""
-    def _cursorUtf8(self, cursor):
-        cursor.execute('SET NAMES utf8;')
-        cursor.execute('SET CHARACTER SET utf8;')
-        cursor.execute('SET character_set_connection=utf8;')
-        return cursor
+	def _cursorUtf8(self, cursor):
+		cursor.execute('SET NAMES utf8;')
+		cursor.execute('SET CHARACTER SET utf8;')
+		cursor.execute('SET character_set_connection=utf8;')
+		return cursor
 		
 	def _get_version(self, db, host):
 		if host in self.mysql_version:
