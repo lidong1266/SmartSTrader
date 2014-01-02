@@ -57,7 +57,7 @@ class Stream(threading.Thread):
 	def run(self):
 		
 		while True:
-			self.get_us_stock_price('gb_qihu')
+			self.get_us_stock_price('gb_' + self.Symbol.lower())
 			sleep(30)
 			now = datetime.datetime.now(EST())
 			print "%s says Hello World at time: %s" % (self.getName(), now)

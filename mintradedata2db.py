@@ -26,7 +26,7 @@ def Main():
 	mysqlConfig = MySqlConfig(dbname='smartstrader')
 	mysql = MySql('smartstrader', 'smartstrader', True)
 	mysql.check(mysqlConfig)
-	stream = Stream('QIHU', '')
+	stream = Stream('QUNR', '')
 	handler = MysqlStreamHandler(mysql)
 	stream.RegisterHandler(handler)
 	
@@ -34,7 +34,7 @@ def Main():
 	#stream = Stream('QIHU', '')
 	stream.StartPoll()
 	print 'xxx'
-	sleep(3600)
+	sleep(10 * 3600)
 	print "xx"
 	
 if __name__ == "__main__":

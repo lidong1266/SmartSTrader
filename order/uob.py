@@ -30,6 +30,7 @@ UOB_PASSWORD = ''
 UOB_USERNAME = config.get('UOB_ONLINE', 'username')
 UOB_PASSWORD = config.get('UOB_ONLINE', 'password')
 
+MARKET_SYMBOL = {"NASDAQ":"Q", "NYSE":"N", "AMEX":"A", "Q":"Q", "N":"N", "A":"A"}
 
 order_pattern = re.compile("This order has been accepted under number:<b>(UB[0-9]+)</b>,<br>")
 stock_symbol_pattern = re.compile("Market=[a-zA-Z]&Symbol=([A-Z]+)")
@@ -346,13 +347,14 @@ Accept-Encoding: gzip, deflate
 Connection: keep-alive
 Referer: https://us.uobkayhian.com/stocks/quote/quote.asp?Market=N&Symbol=YOKU
 Cookie: ASPSESSIONIDASDRCBTB=xxxx; KDICKDKYKBIBII0XHVKVYKLKWIQUZTKPKCKAWIEKLKDHBIA=ssss; ASPSESSIONIDSQBTADTB=yyyy"""
-def PlaceOrderToUOB():
+def PlaceOrderToUOB(cookie, symbol, market, type, limit, price, quantity, currency):
 	conn=httplib.HTTPSConnection('us.uobkayhian.com', 443)
 	user_agent = 'Mozilla/5.0 (Windows NT 5.1; rv:12.0) Gecko/20100101 Firefox/12.0'
 	ck=''
-	for item in cj:
-		ck= ck+item + "; "
-	ck=ck[0:-2]
+	if not isinstance(cookie, str):
+		ck = "; ".join(cookie)
+	else:
+		ck = cookie	
 	#print "CK:%s" % ck
 	hdrs = { 'User-Agent' : user_agent,
 	'Host': 'us.uobkayhian.com', 
@@ -362,7 +364,11 @@ def PlaceOrderToUOB():
 	#'Connection': 'keep-alive',
 	'Referer': 'https://us.uobkayhian.com/stocks/quote/quote.asp?Market=N&Symbol=YOKU',
 	'Cookie':ck}
-
+	
+	if MARKET_SYMBOL.has_key(market.upper()):
+		markey_symbol = MARKET_SYMBOL[market.upper()]
+	else:
+		return
 	conn.request("GET", "/trade/execute/trade_U.asp?market=N&preorgood=0&transaction=B&symbol=YOKU&quantity=1&type=0&price=1&stop=&fill=0&valid=0&currency=USD", headers=hdrs)
 	content = conn.getresponse()
 	#print content.getheaders()
@@ -384,14 +390,16 @@ def PlaceOrderToUOB():
 		
 	conn.close()
 	
-def ConfirmOrderToUOB():
+def ConfirmOrderToUOB(cookie, symbol, market, type, limit, price, quantity, currency):
 	conn=httplib.HTTPSConnection('us.uobkayhian.com', 443)
 	user_agent = 'Mozilla/5.0 (Windows NT 5.1; rv:12.0) Gecko/20100101 Firefox/12.0'
 	ck=''
 	order_no = None
-	for item in cj:
-		ck= ck+item + "; "
-	ck=ck[0:-2]
+
+	if not isinstance(cookie, str):
+		ck = "; ".join(cookie)
+	else:
+		ck = cookie	
 	#print "CK:%s" % ck
 	hdrs = { 'User-Agent' : user_agent,
 	'Host': 'us.uobkayhian.com', 

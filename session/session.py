@@ -80,3 +80,5 @@ class UOBSession(Session):
 			return self._cookie
 		else:
 			return None
+	def PlaceOrder(self, symbol, order_type, limit, price, quntity)
+		pass

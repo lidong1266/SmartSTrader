@@ -27,3 +27,4 @@ if __name__ == '__main__':
 	todays_orders = session.GetTodaysOrder()
 	if not todays_orders:
 		print "You don't have any today's order"
+	print "Try to place an order"
