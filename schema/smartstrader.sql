@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 02, 2014 at 08:06 AM
+-- Generation Time: Jan 02, 2014 at 08:49 AM
 -- Server version: 5.6.12-log
 -- PHP Version: 5.4.16
 
@@ -21,6 +21,33 @@ SET time_zone = "+00:00";
 --
 CREATE DATABASE IF NOT EXISTS `smartstrader` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 USE `smartstrader`;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stock_exchange`
+--
+
+DROP TABLE IF EXISTS `stock_exchange`;
+CREATE TABLE IF NOT EXISTS `stock_exchange` (
+  `eid` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(16) NOT NULL,
+  PRIMARY KEY (`eid`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
+
+--
+-- Truncate table before insert `stock_exchange`
+--
+
+TRUNCATE TABLE `stock_exchange`;
+--
+-- Dumping data for table `stock_exchange`
+--
+
+INSERT INTO `stock_exchange` (`eid`, `name`) VALUES
+(1, 'NASDAQ'),
+(2, 'NYSE'),
+(3, 'AMEX');
 
 -- --------------------------------------------------------
 
@@ -237,7 +264,7 @@ CREATE TABLE IF NOT EXISTS `trade_minute_history` (
   `server_time` datetime NOT NULL,
   `client_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=36 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=37 ;
 
 --
 -- Truncate table before insert `trade_minute_history`
@@ -281,7 +308,8 @@ INSERT INTO `trade_minute_history` (`id`, `sid`, `price`, `volume`, `server_time
 (32, 1, '82.0500', 2077585, '2014-01-01 09:47:13', '2014-01-02 15:12:57'),
 (33, 1, '82.0500', 2077585, '2014-01-01 09:47:13', '2014-01-02 15:13:28'),
 (34, 1, '82.0500', 2077585, '2014-01-01 09:47:13', '2014-01-02 15:13:58'),
-(35, 1, '82.0500', 2077585, '2014-01-01 09:47:13', '2014-01-02 15:14:28');
+(35, 1, '82.0500', 2077585, '2014-01-01 09:47:13', '2014-01-02 15:14:28'),
+(36, 1, '26.5300', 223141, '2014-01-01 09:38:55', '2014-01-02 16:18:31');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
