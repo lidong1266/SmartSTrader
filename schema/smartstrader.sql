@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 02, 2014 at 05:59 AM
+-- Generation Time: Jan 02, 2014 at 07:01 AM
 -- Server version: 5.6.12-log
 -- PHP Version: 5.4.16
 
@@ -101,13 +101,26 @@ CREATE TABLE IF NOT EXISTS `trade_minute_history` (
   `server_time` datetime NOT NULL,
   `client_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
 
 --
 -- Truncate table before insert `trade_minute_history`
 --
 
 TRUNCATE TABLE `trade_minute_history`;
+--
+-- Dumping data for table `trade_minute_history`
+--
+
+INSERT INTO `trade_minute_history` (`id`, `sid`, `price`, `volume`, `server_time`, `client_time`) VALUES
+(3, 1, '82.0500', 2077585, '2014-01-01 09:47:13', '2014-01-02 14:58:16'),
+(4, 1, '82.0500', 2077585, '2014-01-01 09:47:13', '2014-01-02 14:58:46'),
+(5, 1, '82.0500', 2077585, '2014-01-01 09:47:13', '2014-01-02 14:59:17'),
+(6, 1, '82.0500', 2077585, '2014-01-01 09:47:13', '2014-01-02 14:59:47'),
+(7, 1, '82.0500', 2077585, '2014-01-01 09:47:13', '2014-01-02 15:00:18'),
+(8, 1, '82.0500', 2077585, '2014-01-01 09:47:13', '2014-01-02 15:00:48'),
+(9, 1, '82.0500', 2077585, '2014-01-01 09:47:13', '2014-01-02 15:01:18');
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
