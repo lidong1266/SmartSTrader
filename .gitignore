@@ -4,7 +4,7 @@ SmartSTrader.cfg
 *.so
 
 # HTML
-*.html
+tmp/*.html
 
 # Packages
 *.egg
