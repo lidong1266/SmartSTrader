@@ -69,7 +69,7 @@ class UOBSession(Session):
 			self._cookie = "; ".join(self._cookies)
 			self._sessionValid = True
 			
-	def GetTodaysOrder():
+	def GetTodaysOrder(self):
 		if not self._sessionValid:
 			return None
 		today_orders = GetTodaysOrder(self._cookie)

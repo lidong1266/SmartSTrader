@@ -24,4 +24,6 @@ if __name__ == '__main__':
 	print session.GetCookie()
 	session.Login("UOB")
 	print session.GetCookie()
-	print session.GetTodaysOrder()
+	todays_orders = session.GetTodaysOrder()
+	if not todays_orders:
+		print "You don't have any today's order"
