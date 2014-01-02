@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 02, 2014 at 02:07 AM
+-- Generation Time: Jan 02, 2014 at 05:59 AM
 -- Server version: 5.6.12-log
 -- PHP Version: 5.4.16
 
@@ -35,13 +35,20 @@ CREATE TABLE IF NOT EXISTS `stock_symbols` (
   `cname` varchar(64) NOT NULL,
   `fname` varchar(64) NOT NULL,
   `brief` varchar(512) NOT NULL,
-  `firsttrade` date NOT NULL,
-  `52weeklow` decimal(10,0) NOT NULL,
-  `52weekhigh` decimal(10,0) NOT NULL,
-  `lastpriceopen` decimal(10,0) NOT NULL COMMENT 'last trade day''s open price',
-  `lastpriceclose` decimal(10,0) NOT NULL,
-  `lastpricehigh` decimal(10,0) NOT NULL,
-  `lastpricelow` decimal(10,0) NOT NULL,
+  `ipodate` date NOT NULL,
+  `52weeklow` decimal(10,4) NOT NULL,
+  `52weekhigh` decimal(10,4) NOT NULL,
+  `lastpriceopen` decimal(10,4) NOT NULL COMMENT 'last trade day''s open price',
+  `lastpriceclose` decimal(10,4) NOT NULL,
+  `lastpricehigh` decimal(10,4) NOT NULL,
+  `lastpricelow` decimal(10,4) NOT NULL,
+  `change` decimal(10,4) NOT NULL,
+  `changepc` decimal(10,4) NOT NULL,
+  `volumeoftoday` int(11) NOT NULL,
+  `marketvalue` decimal(10,4) NOT NULL,
+  `PE` decimal(10,4) NOT NULL,
+  `industry` int(11) NOT NULL,
+  `exchange` int(11) NOT NULL,
   PRIMARY KEY (`sid`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
@@ -54,8 +61,8 @@ TRUNCATE TABLE `stock_symbols`;
 -- Dumping data for table `stock_symbols`
 --
 
-INSERT INTO `stock_symbols` (`sid`, `symbol`, `cname`, `fname`, `brief`, `firsttrade`, `52weeklow`, `52weekhigh`, `lastpriceopen`, `lastpriceclose`, `lastpricehigh`, `lastpricelow`) VALUES
-(1, 'QIHU', '', '', '', '0000-00-00', '0', '0', '0', '0', '0', '0');
+INSERT INTO `stock_symbols` (`sid`, `symbol`, `cname`, `fname`, `brief`, `ipodate`, `52weeklow`, `52weekhigh`, `lastpriceopen`, `lastpriceclose`, `lastpricehigh`, `lastpricelow`, `change`, `changepc`, `volumeoftoday`, `marketvalue`, `PE`, `industry`, `exchange`) VALUES
+(1, 'QIHU', '', '', '', '0000-00-00', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', 0, '0.0000', '0.0000', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -66,10 +73,10 @@ INSERT INTO `stock_symbols` (`sid`, `symbol`, `cname`, `fname`, `brief`, `firstt
 DROP TABLE IF EXISTS `trade_daily_history`;
 CREATE TABLE IF NOT EXISTS `trade_daily_history` (
   `sid` int(11) NOT NULL,
-  `openprice` decimal(10,0) NOT NULL,
-  `closeprice` decimal(10,0) NOT NULL,
-  `highprice` decimal(10,0) NOT NULL,
-  `lowprice` decimal(10,0) NOT NULL,
+  `openprice` decimal(10,4) NOT NULL,
+  `closeprice` decimal(10,4) NOT NULL,
+  `highprice` decimal(10,4) NOT NULL,
+  `lowprice` decimal(10,4) NOT NULL,
   `volume` int(11) NOT NULL,
   `tradeday` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -87,11 +94,14 @@ TRUNCATE TABLE `trade_daily_history`;
 
 DROP TABLE IF EXISTS `trade_minute_history`;
 CREATE TABLE IF NOT EXISTS `trade_minute_history` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `sid` int(10) unsigned NOT NULL,
   `price` decimal(10,4) NOT NULL,
+  `volume` int(11) NOT NULL,
   `server_time` datetime NOT NULL,
-  `client_time` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `client_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 --
 -- Truncate table before insert `trade_minute_history`
