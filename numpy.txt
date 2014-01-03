@@ -1,0 +1,4 @@
+http://taylortree.com/exponential-moving-average-ema/
+http://www.loria.fr/~rougier/teaching/numpy/numpy.html
+http://wiki.scipy.org/Tentative_NumPy_Tutorial
+http://www.sam.math.ethz.ch/~raoulb/teaching/PythonTutorial/intro_numpy.html

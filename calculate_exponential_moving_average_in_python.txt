@@ -1,0 +1,119 @@
+from datetime import date
+days = [date(2008,1,1), date(2008,1,2), date(2008,1,7)]
+IQ = [110, 105, 90]
+	
+>>> alpha = 0.5
+>>> assert 0 < alpha <= 1.0
+>>> av = sum(alpha**n.days * iq 
+...     for n, iq in map(lambda (day, iq), today=max(days): (today-day, iq), 
+...         sorted(zip(days, IQ), key=lambda p: p[0], reverse=True)))
+95.0
+	
+from collections import namedtuple
+from operator    import itemgetter
+
+def smooth(iq_data, alpha=1, today=None):
+    """Perform exponential smoothing with factor `alpha`.
+
+    Time period is a day.
+    Each time period the value of `iq` drops `alpha` times.
+    The most recent data is the most valuable one.
+    """
+    assert 0 < alpha <= 1
+
+    if alpha == 1: # no smoothing
+        return sum(map(itemgetter(1), iq_data))
+
+    if today is None:
+        today = max(map(itemgetter(0), iq_data))
+
+    return sum(alpha**((today - date).days) * iq for date, iq in iq_data)
+
+IQData = namedtuple("IQData", "date iq")
+
+if __name__ == "__main__":
+    from datetime import date
+
+    days = [date(2008,1,1), date(2008,1,2), date(2008,1,7)]
+    IQ = [110, 105, 90]
+    iqdata = list(map(IQData, days, IQ))
+    print("n".join(map(str, iqdata)))
+
+    print(smooth(iqdata, alpha=0.5))
+	
+$ python26 smooth.py
+IQData(date=datetime.date(2008, 1, 1), iq=110)
+IQData(date=datetime.date(2008, 1, 2), iq=105)
+IQData(date=datetime.date(2008, 1, 7), iq=90)
+95.0
+	
+def ema(s, n):
+"""
+returns an n period exponential moving average for
+the time series s
+
+s is a list ordered from oldest (index 0) to most
+recent (index -1)
+n is an integer
+
+returns a numeric array of the exponential
+moving average
+"""
+s = array(s)
+ema = []
+j = 1
+
+#get n sma first and calculate the next n period ema
+sma = sum(s[:n]) / n
+multiplier = 2 / float(1 + n)
+ema.append(sma)
+
+#EMA(current) = ( (Price(current) - EMA(prev) ) x Multiplier) + EMA(prev)
+ema.append(( (s[n] - sma) * multiplier) + sma)
+
+#now calculate the rest of the values
+for i in s[n+1:]:
+   tmp = ( (i - ema[j]) * multiplier) + ema[j]
+   j = j + 1
+   ema.append(tmp)
+
+return ema
+	
+y_new = y_old + (input - y_old)*alpha
+	
+y_new = y_old + (input - y_old)*dt/tau
+	
+def movingAverageExponential(values, alpha, epsilon = 0):
+
+   if not 0 < alpha < 1:
+      raise ValueError("out of range, alpha='%s'" % alpha)
+
+   if not 0 <= epsilon < alpha:
+      raise ValueError("out of range, epsilon='%s'" % epsilon)
+
+   result = [None] * len(values)
+
+   for i in range(len(result)):
+       currentWeight = 1.0
+
+       numerator     = 0
+       denominator   = 0
+       for value in values[i::-1]:
+           numerator     += value * currentWeight
+           denominator   += currentWeight
+
+           currentWeight *= alpha
+           if currentWeight < epsilon: 
+              break
+
+       result[i] = numerator / denominator
+
+   return result
+	
+today:        1.0
+yesterday:    0.5
+2 days ago:   0.25
+3 days ago:   0.125
+...etc...
+	
+result = movingAverageExponential(values, 0.75, 0.0001)
