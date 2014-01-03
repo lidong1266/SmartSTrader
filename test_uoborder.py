@@ -24,10 +24,19 @@ if __name__ == '__main__':
 	print session.GetCookie()
 	session.Login("UOB")
 	print session.GetCookie()
-	todays_orders = session.GetTodaysOrder()
-	if not todays_orders:
-		print "You don't have any today's order"
-	print "Try to place an order"
-	#(self, symbol, action, order_type, price, stop_price, quntity)
-	#PlaceOrder(self, symbol, action, order_type, price, stop_price, quntity):
-	session.PlaceOrder('QIHU', 'B', 'limit', 82.05, '', 1)
+	while True:
+		todays_orders = session.GetTodaysOrder()
+		print todays_orders
+		if not todays_orders:
+			print "You don't have any today's order"
+			#(self, symbol, action, order_type, price, stop_price, quntity)
+			print "Try to place an order"
+			#PlaceOrder(self, symbol, action, order_type, price, stop_price, quntity):
+			session.PlaceOrder('QIHU', 'B', 'limit', 82.05, '', 1)
+		else:
+			print "Today's Order"
+			print todays_orders
+			
+			
+			
+		raw_input("xx")
