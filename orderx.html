@@ -1,5 +1,5 @@
 
-<!-- TIME: 4:43:47 AM -->
+<!-- TIME: 4:20:17 AM -->
 
 
 
@@ -172,7 +172,7 @@ function newWindows(url, width, height) {
 
 <!--
 <font face=verdana size=1 color=white><b>
-Fri,&nbsp;3&nbsp;Jan&nbsp;2014&nbsp;4:43:47 AM
+Fri,&nbsp;3&nbsp;Jan&nbsp;2014&nbsp;4:20:17 AM
 </b></font>
 -->
 
@@ -937,6 +937,44 @@ Delayed&nbsp;&nbsp;Cash balance: $11,986.50
 <td><img src="/images/spacer.gif" width="1" height="1" alt="" border="0"></td>
 </tr>
 
+<tr>
+<td align=right><a style="font-size:10px;color:black;font-family:arial;" title="Allows you to create and monitor lists of stocks you are interested in" href="/watchlist/watchlist.asp?MenuID=trade&SubID=Watchlist">Watchlist</a></td>
+<td valign=bottom><img src="/images/bullet.gif" width="10" height="10" alt="" border="0"></td>
+</tr>
+
+
+<tr>
+<td align=right><a style="font-size:10px;color:black;font-family:arial;" title="Allows you to place buy and sell orders" href="/trade/trade.asp?MenuID=trade">Place Order</a></td>
+<td valign=bottom><img src="/images/bullet.gif" width="10" height="10" alt="" border="0"></td>
+</tr>
+
+
+
+
+<tr>
+<td align=right><a style="font-size:10px;color:black;font-family:arial;" title="Allows you to cancel existing orders" href="/myaccount/cancel/getCancelableOrders.asp?MenuID=trade">Cancel Order</a></td>
+<td valign=bottom><img src="/images/bullet.gif" width="10" height="10" alt="" border="0"></td>
+</tr>
+<tr>
+<td align=right><a style="font-size:10px;color:black;font-family:arial;" title="Allows you to search for ticker by company name, by ticker quote and prices of up to 10 companies at a time" href="/stocks/search/search.asp?MenuID=trade">MultiQuotes</a></td>
+<td valign=bottom><img src="/images/bullet.gif" width="10" height="10" alt="" border="0"></td>
+</tr>
+
+<tr>
+<td align=right><a style="font-size:10px;color:black;font-family:arial;" title="US Market Indices" href="/markets/top/marketIndices.asp?MenuID=trade">Market Indices</a></td>
+<td valign=bottom><img src="/images/bullet.gif" width="10" height="10" alt="" border="0"></td>
+</tr>
+
+<!--
+< 'If Session("ecnTrading") = True Then%>
+<tr>
+<td align=right><a style="font-size:10px;color:black;font-family:arial;" title="ECN Trading" href="/trade/ecnTrade.asp?MenuID=trade">ECN Trading</a></td>
+<td valign=bottom><img src="/images/bullet.gif" width="10" height="10" alt="" border="0"></td>
+</tr>
+< 'End If %>
+-->
+
+
 
 </table>
 </td></tr></table>
@@ -952,19 +990,6 @@ Delayed&nbsp;&nbsp;Cash balance: $11,986.50
 		<td><img src="/images/spacer.gif" width="1" height="1" alt="" border="0"></td>
 		</tr>
 		
-
-		<tr>
-		<td align=right><a style="font-size:10px;color:black;font-family:arial;" title="Shows all orders entered in a trading day" href="/myaccount/portfolio/getOrders.asp?MenuID=orderb&type=today">Today's Orders</a></td>
-		<td valign=bottom><img src="/images/bullet.gif" width="10" height="10" alt="" border="0"></td>
-		</tr>
-		<tr>
-		<td align=right><a style="font-size:10px;color:black;font-family:arial;" title="Shows all orders that are still not filled" href="/myaccount/portfolio/getOrders.asp?MenuID=orderb&type=open">Pending Orders</a></td>
-		<td valign=bottom><img src="/images/bullet.gif" width="10" height="10" alt="" border="0"></td>
-		</tr>
-		<tr>
-		<td align=right><a style="font-size:10px;color:black;font-family:arial;" title="Shows all orders that had been filled" href="/myaccount/portfolio/getOrders.asp?MenuID=orderb&type=exec">Executed Orders</a></td>
-		<td valign=bottom><img src="/images/bullet.gif" width="10" height="10" alt="" border="0"></td>
-		</tr>
 
 		</table>
 
@@ -998,6 +1023,27 @@ Delayed&nbsp;&nbsp;Cash balance: $11,986.50
 
 		
 
+<!--
+		<table cellpadding=4 cellspacing=0 border=0>
+		<tr><td align=right nowrap>
+		<b><a style="font-size:11px;color:0D1079;font-family:verdana;">R E S E A R C H</a></b>
+		</td>
+		<td><img src="/images/spacer.gif" width="1" height="1" alt="" border="0"></td>
+		</tr>
+		<tr>
+		<td align=right><a style="font-size:10px;color:black;font-family:arial;" href="/stocks/profile/profile.asp?Symbol=QIHU"><b>QIHU</b> Profile</a></td>
+		<td valign=bottom><img src="/images/bullet.gif" width="10" height="10" alt="" border="0"></td>
+		</tr>
+		<tr>
+		<td align=right><a style="font-size:10px;color:black;font-family:arial;" href="/stocks/recommendations/recommend.asp?Symbol=QIHU">Analysts on <b>QIHU</b></a></td>
+		<td valign=bottom><img src="/images/bullet.gif" width="10" height="10" alt="" border="0"></td>
+		</tr>
+		</table>
+<br>
+-->
+
+<!--VTStreamer-->
+
 
 <!--/SUBMENU-->
 
@@ -1019,23 +1065,90 @@ Delayed&nbsp;&nbsp;Cash balance: $11,986.50
 
 
 <br>
-<font face=verdana size=1><center><b>There are currently no orders to display.</b></center></font>
+<!-- trade -->
 
-<table align=center cellpadding=0 border=0 cellspacing=1 width=90% class=main>
-<tr bgcolor=white>
-<td bgcolor=0D1079 colspan=7 valign=middle width=100% class=mainHeader>&nbsp;Other Orders</td>
-</tr>
-<tr bgcolor=cdcdcd class=mainBold>
-	<td align=center nowrap>Order Ref</td>
-	<td align=center nowrap>Symbol</td>
-	<td align=center nowrap>Date</td>
-	<td align=center nowrap>Qty</td>
-	<td align=center nowrap>Buy/Sell</td>
-	<td align=center nowrap>Status</td>
-</tr>
-<tr bgcolor=ffffff><td align=center nowrap>&nbsp;<a href=/myaccount/positions/orderdetails.asp?order=UB1691692&MenuId=2>UB1691692</a></font></td><td align=center nowrap>&nbsp;<a href=/stocks/quote/quote.asp?market=N&symbol=QIHU&MenuID=2&OptionFlag=0>QIHU</a></font></td><td align=center nowrap>&nbsp;1/3/2014 4:40:09 AM</font></td><td align=center nowrap>&nbsp;1</font></td><td align=center nowrap>&nbsp;Buy</td><td align=center nowrap>&nbsp;C</font></td></tr><tr bgcolor=eaeaea><td align=center nowrap>&nbsp;<a href=/myaccount/positions/orderdetails.asp?order=UB1691691&MenuId=2>UB1691691</a></font></td><td align=center nowrap>&nbsp;<a href=/stocks/quote/quote.asp?market=N&symbol=QIHU&MenuID=2&OptionFlag=0>QIHU</a></font></td><td align=center nowrap>&nbsp;1/3/2014 4:39:40 AM</font></td><td align=center nowrap>&nbsp;1</font></td><td align=center nowrap>&nbsp;Buy</td><td align=center nowrap>&nbsp;C</font></td></tr><tr bgcolor=ffffff><td align=center nowrap>&nbsp;<a href=/myaccount/positions/orderdetails.asp?order=UB1691690&MenuId=2>UB1691690</a></font></td><td align=center nowrap>&nbsp;<a href=/stocks/quote/quote.asp?market=N&symbol=QIHU&MenuID=2&OptionFlag=0>QIHU</a></font></td><td align=center nowrap>&nbsp;1/3/2014 4:38:12 AM</font></td><td align=center nowrap>&nbsp;1</font></td><td align=center nowrap>&nbsp;Buy</td><td align=center nowrap>&nbsp;C</font></td></tr><tr bgcolor=eaeaea><td align=center nowrap>&nbsp;<a href=/myaccount/positions/orderdetails.asp?order=UB1691688&MenuId=2>UB1691688</a></font></td><td align=center nowrap>&nbsp;<a href=/stocks/quote/quote.asp?market=N&symbol=QUNR&MenuID=2&OptionFlag=0>QUNR</a></font></td><td align=center nowrap>&nbsp;1/3/2014 4:33:20 AM</font></td><td align=center nowrap>&nbsp;1</font></td><td align=center nowrap>&nbsp;Buy</td><td align=center nowrap>&nbsp;C</font></td></tr>
-</table>
-<!--/CONTENT-->
+
+		<table width=350 align=center cellpadding=2 cellspacing=1 border=0 bgcolor=white class=main>
+		<tr><td align=right colspan=2>
+		
+		</td></tr>
+    
+		<tr bgcolor="0D1079" class=mainHeader><td colspan=2 align=left>Preview Order</td></tr>
+         
+		<tr bgcolor=d8d8d8><td valign=middle align=right width=50%>Transaction&nbsp;</td>
+		<td align=left valign=middle width=50%>&nbsp;
+     
+			Buy
+     		</b></td></tr>
+
+		<tr bgcolor=eaeaea><td valign=middle align=right width=50%>Quantity&nbsp;</td>
+		<td align=left valign=middle width=50%>&nbsp;1</td></tr>
+        
+		<tr bgcolor=d8d8d8><td valign=middle align=right width=50%>Symbol&nbsp;</td>
+		<td align=left valign=middle width=50%>&nbsp;QIHU</td></tr>
+            
+		<tr bgcolor=eaeaea><td valign=middle align=right width=50%>Order&nbsp;Type&nbsp;</td>
+		<td align=left valign=middle width=50%>&nbsp;
+    
+		Limit
+		</td></tr>
+
+		<tr bgcolor=d8d8d8><td valign=middle align=right width="50%">Limit&nbsp;price&nbsp;</td><td align=left valign=middle width="50%">&nbsp;82.05000</td></tr>
+			
+<!--			<tr bgcolor=eaeaea><td valign=middle align=right width=50%>Commission&nbsp;</td><td align=left valign=middle width=50%>&nbsp;<FormatNumber(SendIt.dCommission,2)></td></tr>-->
+
+			<tr bgcolor=eaeaea><td valign=middle align=right width=50%>Fill Type&nbsp;</td><td align=left valign=middle width=50%>&nbsp;
+			ANY
+		
+			</td></tr>
+			<tr bgcolor=d8d8d8><td valign=middle align=right width=50%>Validity&nbsp;</td>
+			<td align=left valign=middle width=50%>&nbsp;
+
+			DAY
+			</td></tr>
+
+			<tr bgcolor=eaeaea><td valign=middle align=right width=50%>Currency Against&nbsp;</td>
+			<td align=left valign=middle width=50%>&nbsp;
+			USD
+			</td></tr>
+						
+   			</table><br>
+
+			
+			
+			<FORM ACTION="/trade/execute/exec_U.asp?MenuID=2" METHOD="GET"> <!-- ORIG: POST-->
+			<INPUT TYPE=hidden NAME="market" VALUE="U">
+			<INPUT TYPE=hidden NAME="transaction" VALUE="B">
+			<INPUT TYPE=hidden NAME="quantity" VALUE="1">
+			<INPUT TYPE=hidden name="symbol" VALUE="QIHU">
+			<INPUT TYPE=hidden NAME="type" VALUE="0">
+			<INPUT TYPE=hidden NAME="valid" VALUE="0">
+			<INPUT TYPE=hidden NAME="fill" VALUE="0">
+			<INPUT TYPE=hidden NAME="price" VALUE="82.05">
+			<INPUT TYPE=hidden NAME="stop" VALUE="">
+			<INPUT TYPE=hidden NAME="currency" VALUE="USD">
+			<INPUT TYPE=hidden NAME="preorgood" VALUE="1">						
+			
+
+			<center><font face=verdana size=1><strong>Please enter your trading password for confirmation</strong></font><br><br>
+        
+			<input class=fields type=password Name=Password size=15 VALUE="">&nbsp
+			<input class=fields type=submit value="I confirm this order">
+			</center>
+        
+
+<!--		<table align=center border=0 cellpadding=0 cellspacing=0 width=400>
+			<tr><td align=center colspan=5 background=/images/header_bg-red.gif><img src=/images/spacer.gif width=1 height=20 border=0></td></tr>
+			<tr bgcolor=eaeaea><td align=center bgcolor=eaeaea><font face=verdana size=2 color=black>Please enter your trading password for confirmation</td></tr>
+			<tr><td bgcolor=eaeaea><img src=/images/spacer.gif width=1 height=5 border=0></td></tr>
+			<tr><td align=center bgcolor=eaeaea><input type=password Name=Password size=15 VALUE="">&nbsp;<input type=submit value=" I confirm this order " style="background:#BFD1F5 url(/images/menu-1_bg.gif) repeat-x"></td></tr>
+			<tr><td bgcolor=eaeaea><img src=/images/spacer.gif width=1 height=5 border=0></td></tr>
+			<tr><td colspan=5 bgcolor=c6c6c6><img src=/images/spacer.gif width=1 height=3 border=0></td></tr></table></center></form>			
+			<br>
+			<center>-->
+
+     
+		<!--/CONTENT-->
 
 </td>
 <!--/MAIN-->

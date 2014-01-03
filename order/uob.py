@@ -35,6 +35,18 @@ MARKET_SYMBOL = {"NASDAQ":"Q", "NYSE":"N", "AMEX":"A", "Q":"Q", "N":"N", "A":"A"
 order_pattern = re.compile("This order has been accepted under number:<b>(UB[0-9]+)</b>,<br>")
 stock_symbol_pattern = re.compile("Market=[a-zA-Z]&Symbol=([A-Z]+)")
 
+class UOBException(Exception):
+	def __init__(self):
+		self.message = "UOB Exception"
+	def __str__(self):
+		return repr(self.message)
+
+class UOBUnexpectedException(Exception):
+	def __init__(self, message):
+		self.message = message
+	def __str__(self):
+		return repr(self.message)
+		
 #SETP1
 #fist connection attempt.
 def ConnectToUOBWIthLogin():
@@ -241,15 +253,16 @@ Content-Length: 121
 Content-Type: text/html
 
 """	
-def FindCompanyBySymbol(symbol):
+def FindCompanyBySymbol(symbol, cookie):
 	stock_symbol = None
 	http_location = None
 	conn=httplib.HTTPSConnection('us.uobkayhian.com', 443)
 	user_agent = 'Mozilla/5.0 (Windows NT 5.1; rv:12.0) Gecko/20100101 Firefox/12.0'
 	ck=''
-	for item in cj:
-		ck= ck+item + "; "
-	ck=ck[0:-2]
+	if not isinstance(cookie, str):
+		ck = "; ".join(cookie)
+	else:
+		ck = cookie	
 	#print "CK:%s" % ck
 	hdrs = { 'User-Agent' : user_agent,
 	'Host': 'us.uobkayhian.com', 
@@ -263,7 +276,7 @@ def FindCompanyBySymbol(symbol):
 	http_url = "/stocks/search/findcompany.asp?market=N&choice=0&search_string=%s&x=12&y=14" % (symbol)
 	conn.request("GET", http_url, headers=hdrs)
 	content = conn.getresponse()
-	print content.getheaders()
+	#print content.getheaders()
 	#print content.read()
 	#print content.reason, content.status
 	hdrs = content.getheader('set-cookie')
@@ -271,16 +284,16 @@ def FindCompanyBySymbol(symbol):
 	status = content.status
 	if status == 302:
 		http_location = content.getheader('Location')
-		print http_location
+		#print http_location
 		stock_symbol_m =  stock_symbol_pattern.search(http_location)
 		if stock_symbol_m:
 			stock_symbol = stock_symbol_m.group(1)
-			print "stock_symbol:%s" % stock_symbol
+			#print "stock_symbol:%s" % stock_symbol
 	else:
-		pass
-	if content.getheader('Set-Cookie')!=None:
-		cj.append(content.getheader('Set-Cookie').split(';')[0])
-	hdrs = content.getheader('set-cookie')
+		raise UOBUnexpectedException("Non 302 status code returned")
+	#if content.getheader('Set-Cookie')!=None:
+	#	cj.append(content.getheader('Set-Cookie').split(';')[0])
+	#hdrs = content.getheader('set-cookie')
 	#print "4:%s" % hdrs
 	#print cj
 		
@@ -299,13 +312,16 @@ Accept-Encoding: gzip, deflate
 Connection: keep-alive
 Referer: https://us.uobkayhian.com/markets/top/top.asp?MenuID=trade
 Cookie: ASPSESSIONIDASDRCBTB=xxxx; KDICKDKYKBIBII0XHVKVYKLKWIQUZTKPKCKAWIEKLKDHBIA=ssss; ASPSESSIONIDSQBTADTB=yyyy"""
-def SearchStockSymbol(symbol):
+def NavigateToOrderPlaceForm(redirect_url, symbol, cookie):
 	conn=httplib.HTTPSConnection('us.uobkayhian.com', 443)
 	user_agent = 'Mozilla/5.0 (Windows NT 5.1; rv:12.0) Gecko/20100101 Firefox/12.0'
+
 	ck=''
-	for item in cj:
-		ck= ck+item + "; "
-	ck=ck[0:-2]
+	if not isinstance(cookie, str):
+		ck = "; ".join(cookie)
+	else:
+		ck = cookie	
+		
 	#print "CK:%s" % ck
 	hdrs = { 'User-Agent' : user_agent,
 	'Host': 'us.uobkayhian.com', 
@@ -316,24 +332,41 @@ def SearchStockSymbol(symbol):
 	'Referer': 'https://us.uobkayhian.com/markets/top/top.asp?MenuID=trade',
 	'Cookie':ck}
 
-	conn.request("GET", "/stocks/quote/quote.asp?Market=N&Symbol=YOKU", headers=hdrs)
+	#conn.request("GET", "/stocks/quote/quote.asp?Market=N&Symbol=YOKU", headers=hdrs)
+	conn.request("GET", redirect_url, headers=hdrs)
 	content = conn.getresponse()
-	print content.getheaders()
+	#print content.getheaders()
 	#print content.read()
 	#print content.reason, content.status
 	hdrs = content.getheader('set-cookie')
 
 	status = content.status
-	#if status == 302:
+	if status != 200:
+		raise UOBUnexpectedException("Non 200 status code returned")
 
-	if content.getheader('Set-Cookie')!=None:
-		cj.append(content.getheader('Set-Cookie').split(';')[0])
-	hdrs = content.getheader('set-cookie')
+	html_form = content.read()
+	#print html_form
+	soup = BeautifulSoup(html_form, convertEntities=BeautifulSoup.HTML_ENTITIES)
+	table = soup.findAll(name='table', attrs = {'class':'main', 'width':'350',  'cellspacing':'1',  'cellpadding':'4',  'border':'0'}, align="center")
+	if len(table) > 1:
+		raise UOBUnexpectedException("Unexpected table count returned from BeautifulSoup")
+	
+	#firstRow = table[0].contents
+	#print firstRow
+	input_market = table[0].find(name='input', attrs = { "type":"hidden", "name":"market"})
+	#print input_market["value"]
+	
+	input_preorgood = table[0].find(name='input', attrs = { "type":"hidden", "name":"preorgood"})
+	#print input_preorgood["value"]
+	
+	#if content.getheader('Set-Cookie')!=None:
+	#	cj.append(content.getheader('Set-Cookie').split(';')[0])
+	#hdrs = content.getheader('set-cookie')
 	#print "4:%s" % hdrs
 	#print cj
 		
 	conn.close()
-
+	return (input_market["value"], input_preorgood["value"])
 
 	#exit(0)
 
@@ -347,50 +380,95 @@ Accept-Encoding: gzip, deflate
 Connection: keep-alive
 Referer: https://us.uobkayhian.com/stocks/quote/quote.asp?Market=N&Symbol=YOKU
 Cookie: ASPSESSIONIDASDRCBTB=xxxx; KDICKDKYKBIBII0XHVKVYKLKWIQUZTKPKCKAWIEKLKDHBIA=ssss; ASPSESSIONIDSQBTADTB=yyyy"""
-def PlaceOrderToUOB(cookie, symbol, market, type, limit, price, quantity, currency):
+"""
+order_type
+limit - 0
+
+"""
+def GetOrderType(order_type):
+	if order_type == 'limit':
+		return 0
+		
+def PlaceOrderToUOB(cookie, symbol, market, preorgood, action, order_type, price, stop_price, quntity, referer):
 	conn=httplib.HTTPSConnection('us.uobkayhian.com', 443)
 	user_agent = 'Mozilla/5.0 (Windows NT 5.1; rv:12.0) Gecko/20100101 Firefox/12.0'
+
 	ck=''
 	if not isinstance(cookie, str):
 		ck = "; ".join(cookie)
 	else:
 		ck = cookie	
-	#print "CK:%s" % ck
+	
+	if referer:
+		referer = "https://us.uobkayhian.com" + referer
+	else:
+		referer = ""
+	print referer
 	hdrs = { 'User-Agent' : user_agent,
 	'Host': 'us.uobkayhian.com', 
 	'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
 	'Accept-Language': 'en-us,en;q=0.5',
 	'Accept-Encoding': 'gzip, deflate',
 	#'Connection': 'keep-alive',
-	'Referer': 'https://us.uobkayhian.com/stocks/quote/quote.asp?Market=N&Symbol=YOKU',
+	'Referer': referer,
 	'Cookie':ck}
 	
 	if MARKET_SYMBOL.has_key(market.upper()):
 		markey_symbol = MARKET_SYMBOL[market.upper()]
 	else:
-		return
-	conn.request("GET", "/trade/execute/trade_U.asp?market=N&preorgood=0&transaction=B&symbol=YOKU&quantity=1&type=0&price=1&stop=&fill=0&valid=0&currency=USD", headers=hdrs)
+		raise UOBUnexpectedException("Unexpected MARKET_SYMBOL")
+		
+	values = {'market' 		: market,
+			  'preorgood' 	: preorgood,
+			  'transaction' : action,
+			  'symbol': symbol,
+			  'quantity' : "%d" % quntity,
+			  'type': GetOrderType(order_type),
+			  'price':price,
+			  'stop':stop_price,
+			  'fill':0,
+			  'valid':0,
+			  'currency':"USD"}
+
+	data = urllib.urlencode(values)
+	#print data
+	
+	
+	#"/trade/execute/trade_U.asp?market=N&preorgood=0&transaction=B&symbol=YOKU&quantity=1&type=0&price=1&stop=&fill=0&valid=0&currency=USD"
+	order_url = "/trade/execute/trade_U.asp?" + data
+	#print order_url
+	#return
+	conn.request("GET", order_url, headers=hdrs)
 	content = conn.getresponse()
 	#print content.getheaders()
 	#print content.reason, content.status
-	hdrs = content.getheader('set-cookie')
+	#hdrs = content.getheader('set-cookie')
 	#print hdrs
-	f_order = open("order.html", "w")
+	#f_order = open("orderx.html", "w")
 	html_order = content.read()
-	f_order.write(html_order)
-	f_order.close()
+	#f_order.write(html_order)
+	#f_order.close()
 	status = content.status
-	#if status == 302:
+	if status != 200:
+		raise UOBUnexpectedException("Non 200 status code returned")
 
-	if content.getheader('Set-Cookie')!=None:
-		cj.append(content.getheader('Set-Cookie').split(';')[0])
-	hdrs = content.getheader('set-cookie')
+	
+	m = re.search("<strong>Please enter your trading password for confirmation</strong>", html_order, re.M)
+	if m:
+		print m.group(0)
+	else:
+		raise UOBUnexpectedException("Unexpected order confirmation page returned")
+	#if content.getheader('Set-Cookie')!=None:
+	#	cj.append(content.getheader('Set-Cookie').split(';')[0])
+	#hdrs = content.getheader('set-cookie')
 	#print "4:%s" % hdrs
 	#print cj
 		
 	conn.close()
 	
-def ConfirmOrderToUOB(cookie, symbol, market, type, limit, price, quantity, currency):
+	return order_url
+	
+def ConfirmOrderToUOB(cookie, symbol, market, preorgood, action, order_type, price, stop_price, quntity, referer):
 	conn=httplib.HTTPSConnection('us.uobkayhian.com', 443)
 	user_agent = 'Mozilla/5.0 (Windows NT 5.1; rv:12.0) Gecko/20100101 Firefox/12.0'
 	ck=''
@@ -400,29 +478,57 @@ def ConfirmOrderToUOB(cookie, symbol, market, type, limit, price, quantity, curr
 		ck = "; ".join(cookie)
 	else:
 		ck = cookie	
-	#print "CK:%s" % ck
+
+	if referer:
+		referer = "https://us.uobkayhian.com" + referer
+	else:
+		referer = ""
+	#print referer
+	#"https://us.uobkayhian.com/trade/execute/trade_U.asp?market=N&preorgood=0&transaction=B&symbol=YOKU&quantity=1&type=0&price=1&stop=&fill=0&valid=0&currency=USD"
 	hdrs = { 'User-Agent' : user_agent,
 	'Host': 'us.uobkayhian.com', 
 	'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
 	'Accept-Language': 'en-us,en;q=0.5',
 	'Accept-Encoding': 'gzip, deflate',
 	#'Connection': 'keep-alive',
-	'Referer': "https://us.uobkayhian.com/trade/execute/trade_U.asp?market=N&preorgood=0&transaction=B&symbol=YOKU&quantity=1&type=0&price=1&stop=&fill=0&valid=0&currency=USD",
+	'Referer': referer,
 	'Cookie':ck}
 
-	url = "/trade/execute/exec_U.asp?market=U&transaction=B&quantity=1&symbol=YOKU&type=0&valid=0&fill=0&price=1&stop=&currency=USD&preorgood=1&Password=%s" % UOB_PASSWORD
-	conn.request("GET", url, headers=hdrs)
+	#print hdrs
+	
+	values = {'market' 		: 'U',
+			  'preorgood' 	: preorgood,
+			  'transaction' : action,
+			  'symbol': symbol,
+			  'quantity' : "%d" % quntity,
+			  'type': GetOrderType(order_type),
+			  'price':price,
+			  'stop':stop_price,
+			  'fill':0,
+			  'valid':0,
+			  'currency':"USD",
+			  'Password':UOB_PASSWORD}
+
+	data = urllib.urlencode(values)
+	#print data
+	
+	
+	#"/trade/execute/trade_U.asp?market=N&preorgood=0&transaction=B&symbol=YOKU&quantity=1&type=0&price=1&stop=&fill=0&valid=0&currency=USD"
+	order_url = "/trade/execute/exec_U.asp?" + data
+	#print order_url
+	#return
+	#url = "/trade/execute/exec_U.asp?market=U&transaction=B&quantity=1&symbol=YOKU&type=0&valid=0&fill=0&price=1&stop=&currency=USD&preorgood=1&Password=%s" % UOB_PASSWORD
+	conn.request("GET", order_url, headers=hdrs)
 	content = conn.getresponse()
 	#print content.getheaders()
 	#print content.reason, content.status
 	hdrs = content.getheader('set-cookie')
 	#print hdrs
-	f_order = open("confirm.html", "w")
+	f_order = open("confirmx.html", "w")
 	html_order = content.read()
 	f_order.write(html_order)
 	f_order.close()
 	status = content.status
-	#if status == 302:
 
 	if content.getheader('Set-Cookie')!=None:
 		cj.append(content.getheader('Set-Cookie').split(';')[0])
@@ -436,6 +542,8 @@ def ConfirmOrderToUOB(cookie, symbol, market, type, limit, price, quantity, curr
 		if order_no_m:
 			order_no = order_no_m.group(1)
 		#"placed_U.asp?market=U&transaction=B&quantity=1&symbol=YOKU&type=0&price=1&stop=&fill=0&valid=0&sOut=This order has been accepted under number:<b>UB1682331</b>,<br>and will be sent to the NYSE exchange.<br><br>Please note that number for future reference.&lastPrice=30.5&dBid=0&dAsk=0&dcommission=0&currency=USD"
+	else:
+		raise UOBUnexpectedException("Non 302 status code returned")
 		
 	conn.close()
 	return order_no
@@ -518,7 +626,6 @@ def CancelOrderToUOB(order_no):
 	f_order.write(html_order)
 	f_order.close()
 	status = content.status
-	#if status == 302:
 
 	if content.getheader('Set-Cookie')!=None:
 		cj.append(content.getheader('Set-Cookie').split(';')[0])
@@ -527,7 +634,74 @@ def CancelOrderToUOB(order_no):
 	#print cj
 		
 	conn.close()
+"""
+GET /myaccount/cancelReplace/canRepEntry.asp?orderRef=UB1691693&transaction=B&margin=0&quantity=1&symbol=QIHU&type=0&price=82.05&stop=0&fill=0&valid=0&currency=USD&optionFlag=0&openClose=&underlying=&covered=&route=ATD HTTP/1.1
+Host: us.uobkayhian.com
+User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:26.0) Gecko/20100101 Firefox/26.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Referer: https://us.uobkayhian.com/myaccount/portfolio/getOrders.asp?MenuID=orderb&type=today
+Cookie: __utma=1.779340795.1388628873.1388628873.1388628873.1; __utmz=1.1388628873.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); ASPSESSIONIDASDRCBTB=BDIKCHODGEBHLDGFLDAKAFON; KDICKDKYKBIBII0XHVKVYKLKWIQUZTKPKCKAWIEKLKDHBIAYKLKXIC=IEKCHJFKDIBVIRQKGIQIQUMKZEIANKJKGKXOAFNYWQ; ASPSESSIONIDQQDTCDTB=CDIKCHODGEAGLNIJHOEFMIKL
+Connection: keep-alive
+"""
+def CancelReplaceOrderToUOB(order_no):
+	conn=httplib.HTTPSConnection('us.uobkayhian.com', 443)
+	user_agent = 'Mozilla/5.0 (Windows NT 5.1; rv:12.0) Gecko/20100101 Firefox/12.0'
+	ck=''
+	for item in cj:
+		ck= ck+item + "; "
+	ck=ck[0:-2]
+	#print "CK:%s" % ck
+	hdrs = { 'User-Agent' : user_agent,
+	'Host': 'us.uobkayhian.com', 
+	'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+	'Accept-Language': 'en-us,en;q=0.5',
+	'Accept-Encoding': 'gzip, deflate',
+	#'Connection': 'keep-alive',
+	'Referer': "https://us.uobkayhian.com/myaccount/portfolio/getOrders.asp?MenuID=orderb&type=today",
+	'Cookie':ck,
+	"Content-type": "application/x-www-form-urlencoded"}
 
+	if isinstance(order_no, str):
+		data="order=%s&password=%s&Submit=Cancel" % (order_no, UOB_PASSWORD)
+	else:
+		order_params = ''
+		for order in order_no:		
+			order_params = order_params + "order=%s&" % (order)
+		data="%spassword=%s&Submit=Cancel" % (order_params, UOB_PASSWORD)
+	print data
+	#order=UB1682364&password=%UOB_PASSWORD%&Submit=Cancel
+	#order=UB1682364&password=%UOB_PASSWORD%&Submit=Cancel
+	conn.request("POST", "/myaccount/cancel/cancel2.asp", data, headers=hdrs)
+	content = conn.getresponse()
+	#print content.getheaders()
+	#print content.reason, content.status
+	hdrs = content.getheader('set-cookie')
+	#print hdrs
+	f_order = open("cancel.html", "w")
+	#UBxxxx: Order UBxxxx has been canceled.
+	html_order = content.read()
+	
+	cancel_order_pattern = re.compile("(UB[0-9]+):\\s+Order\\s+(UB[0-9]+) has been canceled")
+	#UBxxxx: Order UBxxxx has been canceled.
+	cancel_order_m =  cancel_order_pattern.search(html_order)
+	if cancel_order_m:
+		order_no_result = cancel_order_m.group(1)
+	if order_no_result == order_no:
+		print "Cancel successfully"
+	f_order.write(html_order)
+	f_order.close()
+	status = content.status
+
+	if content.getheader('Set-Cookie')!=None:
+		cj.append(content.getheader('Set-Cookie').split(';')[0])
+	hdrs = content.getheader('set-cookie')
+	#print "4:%s" % hdrs
+	#print cj
+		
+	conn.close()
+	
 class UOBOrder():
 	def __init__(self):
 		self.orderId = ''
@@ -698,7 +872,7 @@ if __name__ == "__main__":
 	print http_location
 	print stock_symbol
 	sys.exit(0)
-	SearchStockSymbol("YOKU")
+	#NavigateToOrderPlaceForm("YOKU")
 	PlaceOrderToUOB()
 	order_no = ConfirmOrderToUOB()
 	if order_no is not None:

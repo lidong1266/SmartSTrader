@@ -80,5 +80,21 @@ class UOBSession(Session):
 			return self._cookie
 		else:
 			return None
-	def PlaceOrder(self, symbol, order_type, limit, price, quntity)
-		pass
+			
+	"""
+		symbol 			- Stock symbol
+		order_type		- Buy or Sell
+		
+	"""
+	def PlaceOrder(self, symbol, action, order_type, price, stop_price, quntity):
+		#Step-1
+		http_location, stock_symbol = FindCompanyBySymbol(symbol, self._cookie)
+		
+		market, preorgood = NavigateToOrderPlaceForm(http_location, stock_symbol, self._cookie)
+		#def PlaceOrderToUOB(cookie, symbol, market, type, limit, price, quantity, currency):
+		http_location = PlaceOrderToUOB(self._cookie, stock_symbol, market, preorgood, action, order_type, price, stop_price, quntity, http_location)
+		order_no = ConfirmOrderToUOB(self._cookie, stock_symbol, market, preorgood, action, order_type, price, stop_price, quntity, http_location)
+		#print order_no
+		#print http_location
+		#print stock_symbol
+		return order_no

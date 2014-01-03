@@ -28,3 +28,6 @@ if __name__ == '__main__':
 	if not todays_orders:
 		print "You don't have any today's order"
 	print "Try to place an order"
+	#(self, symbol, action, order_type, price, stop_price, quntity)
+	#PlaceOrder(self, symbol, action, order_type, price, stop_price, quntity):
+	session.PlaceOrder('QIHU', 'B', 'limit', 82.05, '', 1)
