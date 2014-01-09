@@ -3,6 +3,7 @@ import sys
 import re
 
 import logging
+import MySQLdb
 
 class MySqlConfig:
 	def __init__(self, host = 'localhost', port=3306, user='root', password = '', dbname = 'mysql', mysql_sock = '', defaults_file = '', tags = None, options={}):
@@ -136,6 +137,10 @@ class MySql:
 				raise
 			self._reconnect()
 		return self.cursor.fetchall()
+	def lastrowid(self):
+		assert self.cursor, "%s already closed?" % (self,)
+		return self.cursor.lastrowid
+		
 	def close(self):
 		"""Closes the connection to this MySQL server."""
 		if self.cursor:
